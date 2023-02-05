@@ -1,0 +1,2 @@
+{:select [:diagnoses/icd_code]
+ :from   [[[:pivot :diagnoses :patient_id]]]}

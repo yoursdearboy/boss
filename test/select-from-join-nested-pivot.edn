@@ -1,0 +1,5 @@
+{:select    [:donors/last_name :donorships/date :patients/last_name :diagnoses/icd_code]
+ :from      [:donors]
+ :left-join [:donorships [:= :donorships/donor_id :donors/id]
+             :patients [:= :patients/id :donorships/patient_id]
+             [[:pivot :diagnoses :patient_id]] [:= :diagnoses/patient_id :patients/id]]}

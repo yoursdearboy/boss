@@ -1,4 +1,4 @@
 {:select [:patients/id :patients/last_name :donorships/date :donors/last_name]
- :from [:patients]
- :join [:donorships [:= :patients/id :donorships/patient_id]
-        :donors [:= :donorships/donor_id :donors/id]]}
+ :from   [:patients]
+ :join   [:donorships [:= :patients/id :donorships/patient_id]
+          :donors [:= :donorships/donor_id :donors/id]]}

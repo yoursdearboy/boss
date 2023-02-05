@@ -1,3 +1,3 @@
 {:select [:patients/id :patients/last_name :diagnoses/icd_code]
- :from [:patients]
- :join [:diagnoses [:= :patients.id :diagnoses.patient_id]]}
+ :from   [:patients]
+ :join   [:diagnoses [:= :patients/id :diagnoses.patient_id]]}

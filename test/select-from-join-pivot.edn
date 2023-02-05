@@ -1,0 +1,3 @@
+{:select    [:patients/last_name :diagnoses/icd_code]
+ :from      [:patients]
+ :left-join [[[:pivot :diagnoses :patient_id] :diagnoses] [:= :patients/id :diagnoses/patient_id]]}
