@@ -7,12 +7,21 @@
                  [com.github.seancorfield/honeysql "2.4.972"]
                  [ring "1.9.6"]
                  [compojure "1.7.0"]
-                 [reagent "0.10.0"]]
+                 [reagent "0.10.0"]
+                 [cljs-ajax "0.8.4"]]
   :plugins [[lein-environ "1.2.0"]
-            [lein-cljsbuild "1.1.7"]]
+            [lein-cljsbuild "1.1.7"]
+            [lein-figwheel "0.5.18"]]
   :profiles {:dev  {:env {:port "3000" :database-url "jdbc:sqlite:///test/demo.db"}}
-             :test {:env {:port "3000" :database-url "jdbc:sqlite:///test/demo.db"}}}
-  :cljsbuild {:builds [{:source-paths ["src/boss/frontend"] 
-                        :compiler {:optimizations :simple
-                                   :output-to "resources/public/main.js"}}]}
+             :test {:env {:port "3000" :database-url "jdbc:sqlite:///test/demo.db"}}
+             :frontend {:dependencies [[figwheel-sidecar "0.5.20"]]}}
+  :cljsbuild {:builds [{:id "main"
+                        :source-paths ["src/boss/frontend"]
+                        :figwheel true
+                        :compiler {:main "boss.frontend.app"
+                                   :asset-path "js/out"
+                                   :output-dir "resources/public/js/out"
+                                   :output-to "resources/public/js/main.js"}}]}
+  :figwheel {:readline false
+             :server-logfile "/tmp/figwheel-logfile.log"}
   :repl-options {:init-ns boss.core})
