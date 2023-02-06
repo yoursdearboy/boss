@@ -1,0 +1,12 @@
+({:COLUMN_NAME "id", :TABLE_NAME "patients"}
+ {:COLUMN_NAME "last_name", :TABLE_NAME "patients"}
+ {:COLUMN_NAME "first_name", :TABLE_NAME "patients"}
+ {:COLUMN_NAME "middle_name", :TABLE_NAME "patients"}
+ {:COLUMN_NAME "dob", :TABLE_NAME "patients"}
+ {:COLUMN_NAME "sex", :TABLE_NAME "patients"}
+ {:COLUMN_NAME "id", :TABLE_NAME "donorships"}
+ {:COLUMN_NAME "patient_id", :TABLE_NAME "donorships"}
+ {:COLUMN_NAME "donor_id", :TABLE_NAME "donorships"}
+ {:COLUMN_NAME "date", :TABLE_NAME "donorships"}
+ {:COLUMN_NAME "patient_id", :TABLE_NAME "diagnoses"}
+ {:COLUMN_NAME "MAX(icd_code)", :TABLE_NAME ""})
