@@ -1,4 +1,9 @@
-(ns boss.frontend.app)
+(ns boss.frontend.app
+  (:require [reagent.dom :as rdom]))
 
-(defn init []
-  (println "Hello world!"))
+(defn demo []
+  [:div
+   [:h1 "Hello World"]])
+
+(defn ^:export run []
+  (rdom/render [demo] (js/document.getElementById "app")))
