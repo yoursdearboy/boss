@@ -2,14 +2,10 @@
   (:require
     [boss.db :refer :all]
     [boss.pivot :refer [pivot-query]]
-    [clojure.edn :as edn]
+    [boss.test :refer :all]
     [clojure.test :refer :all]
     [honey.sql :as sql]
     [next.jdbc :as jdbc]))
-
-(defn load-edn [source]
-  "Load edn from file"
-  (edn/read-string (slurp source)))
 
 ; FIXME: Test structures and/or queries and/or data?
 (deftest test-select-from

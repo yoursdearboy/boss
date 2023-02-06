@@ -2,16 +2,8 @@
   (:require
     [boss.db :refer :all]
     [boss.meta :refer :all]
-    [clojure.edn :as edn]
+    [boss.test :refer :all]
     [clojure.test :refer :all]))
-
-; FIXME: Move helpers to helpers
-(defn load-sql [source]
-  [(slurp source)])
-
-(defn load-edn [source]
-  "Load edn from file"
-  (edn/read-string (slurp source)))
 
 (deftest test-list-tables
   (is (= (map :TABLE_NAME (list-tables ds))
