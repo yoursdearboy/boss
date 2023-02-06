@@ -1,6 +1,11 @@
-(ns boss.core)
+(ns boss.core
+  (:require
+    [compojure.core :refer :all]
+    [ring.adapter.jetty :refer [run-jetty]]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defroutes app
+  (GET "/" [] "Hello world"))
+
+(defn -main
+  [& args]
+  (run-jetty app {:port 3000}))
