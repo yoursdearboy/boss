@@ -1,13 +1,9 @@
 (ns boss.meta-test
   (:require
-    [clojure.edn :as edn]
-    [next.jdbc :as jdbc]
+    [boss.db :refer :all]
     [boss.meta :refer :all]
+    [clojure.edn :as edn]
     [clojure.test :refer :all]))
-
-; FIXME: Move database to config
-(def db {:dbtype "sqlite" :dbname "test/demo.db"})
-(def ds (jdbc/get-datasource db))
 
 ; FIXME: Move helpers to helpers
 (defn load-sql [source]

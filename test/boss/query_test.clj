@@ -1,14 +1,11 @@
 (ns boss.query-test
   (:require
-    [clojure.edn :as edn]
-    [next.jdbc :as jdbc]
-    [honey.sql :as sql]
+    [boss.db :refer :all]
     [boss.pivot :refer [pivot-query]]
-    [clojure.test :refer :all]))
-
-; FIXME: Move database to config
-(def db {:dbtype "sqlite" :dbname "test/demo.db"})
-(def ds (jdbc/get-datasource db))
+    [clojure.edn :as edn]
+    [clojure.test :refer :all]
+    [honey.sql :as sql]
+    [next.jdbc :as jdbc]))
 
 (defn load-edn [source]
   "Load edn from file"

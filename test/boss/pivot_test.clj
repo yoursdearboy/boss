@@ -1,11 +1,9 @@
 (ns boss.pivot-test
-  (:require [next.jdbc :as jdbc]
-            [honey.sql :as sql]
-            [boss.pivot :refer [pivot]]
-            [clojure.test :refer :all]))
-
-(def db {:dbtype "sqlite" :dbname "test/demo.db"})
-(def ds (jdbc/get-datasource db))
+  (:require
+    [boss.db :refer :all]
+    [boss.pivot :refer [pivot]]
+    [clojure.test :refer :all]
+    [honey.sql :as sql]))
 
 (deftest test-pivot
   (is (= (sql/format (pivot ds :diagnoses :patient_id [:icd_code]))
