@@ -1,14 +1,14 @@
 (ns boss.core
-  (:require
-    [compojure.core :refer :all]
-    [environ.core :refer [env]]
-    [ring.adapter.jetty :refer [run-jetty]]))
+  (:require [compojure.core :refer [defroutes]]
+            [compojure.route :as route]
+            [environ.core :refer [env]]
+            [ring.adapter.jetty :refer [run-jetty]]))
 
 (defroutes app
-  (GET "/" [] "Hello world"))
+  (route/resources "/"))
 
 (def port- (Integer/parseInt (env :port)))
 
 (defn -main
-  [& args]
+  [& _]
   (run-jetty app {:port port-}))
