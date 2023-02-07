@@ -1,9 +1,29 @@
-(ns boss.frontend.app
-  (:require [reagent.dom :as rdom]))
+(ns ^:figwheel-hooks boss.frontend.app
+  (:require [reagent.core :as r]
+            [reagent.dom :as rdom]
+            [ajax.core :refer [GET]]
+            [clojure.edn :as edn]))
 
-(defn demo []
+(defonce tables (r/atom []))
+
+(defn fetch-tables []
+  (GET "/tables"
+    {:handler (comp #(reset! tables %) edn/read-string)}))
+
+(defn from-list-element [x]
+  ^{:key x}
+  [:li (str "Table: " x)])
+
+(defn from-list []
   [:div
-   [:h1 "Hello World"]])
+   [:h1 "Select from"]
+   [:ul (map from-list-element @tables)]])
 
-(defn ^:export run []
-  (rdom/render [demo] (js/document.getElementById "app")))
+(defn app []
+  (fetch-tables)
+  (from-list))
+
+(defn mount []
+  (rdom/render [app] (js/document.getElementById "app")))
+
+(mount)
