@@ -1,5 +1,7 @@
 (ns ^:figwheel-hooks boss.frontend.app
   (:require [ajax.core :refer [GET POST]]
+            [boss.frontend.components :refer [button card delete-button modal
+                                              modal-button table]]
             [clojure.edn :as edn]
             [reagent.core :as r]
             [reagent.dom :as rdom]))
@@ -11,16 +13,16 @@
 (defn update-query! [in f]
   (swap! query #(update % in f)))
 
-(defn add-from-to-query [table]
+(defn add-from-to-query! [table]
   (update-query! :from #(conj % (keyword table))))
 
-(defn remove-from-from-query [table]
+(defn remove-from-from-query! [table]
   (update-query! :from #(into [] (remove #{table} %))))
 
-(defn add-select-to-query [column]
+(defn add-select-to-query! [column]
   (update-query! :select #(conj % (keyword column))))
 
-(defn remove-select-from-query [column]
+(defn remove-select-from-query! [column]
   (update-query! :select #(into [] (remove #{column} %))))
 
 ;; Supportive state
@@ -28,59 +30,34 @@
 (defonce tables (r/atom []))
 (defonce data (r/atom []))
 
-(defn fetch-tables []
+(defn fetch-tables! []
   (GET "/tables"
     {:handler (comp #(reset! tables %) edn/read-string)}))
 
-(defn re-fetch-tables []
+(defn re-fetch-tables! []
   (reset! tables [])
-  (fetch-tables))
+  (fetch-tables!))
 
-(defn fetch-columns []
+(defn fetch-columns! []
   (POST "/query/columns"
     {:body (pr-str (assoc @query :select [:*]))
      :handler (comp #(reset! columns %) edn/read-string)
      :error-handler println}))
 
-(defn re-fetch-columns []
+(defn re-fetch-columns! []
   (reset! columns [])
-  (fetch-columns))
+  (fetch-columns!))
 
-(defn fetch-data []
+(defn fetch-data! []
   (POST "/query"
     {:body (pr-str @query)
      :handler (comp #(reset! data %) edn/read-string)}))
-
-;; Misc UI
-(defn card [title body after]
-  [:div.card.mb-2
-   [:div.card-body
-    [:h5.card-title title]
-    body]
-   after])
-
-(defn delete-button [handler]
-  [:button.btn-close {:on-click handler}])
-
-(defn modal-button [options id text]
-  [:button (merge options {:type "button" :data-bs-toggle "modal" :data-bs-target (str "#" id)}) text])
-
-(defn modal [{:keys [id title body-before body-after]} & body]
-  [:div.modal {:id id}
-   [:div.modal-dialog
-    [:div.modal-content
-     [:div.modal-header
-      [:h5.modal-title title]
-      [:button.btn-close {:data-bs-dismiss "modal"}]]
-     body-before
-     (cond (some? body) [:div.modal-body body])
-     body-after]]])
 
 ;; UI
 (defn from-list-element [x]
   ^{:key x}
   [:button {:class [:list-group-item :list-group-item-action]
-            :on-click #(add-from-to-query x)} x])
+            :on-click #(add-from-to-query! x)} x])
 
 (defn from-list []
   [:div.list-group
@@ -90,69 +67,55 @@
   ^{:key column}
   [:div.list-group-item
    [:span column]
-   [:span.float-end (delete-button #(remove-select-from-query column))]])
+   [:span.float-end (delete-button #(remove-select-from-query! column))]])
 
-(defn query-tree-select-list []
-  (card "Some columns"
-        (modal-button {:class ["btn btn-light btn-outline-dark"]
-                       :on-click re-fetch-columns}
-                      "select-modal"
-                      "Add")
-        [:div.list-group.list-group-flush
-         (map query-tree-select-list-element (:select @query))]))
+(defn query-select-list []
+  (card {:title "Some columns"
+         :body (modal-button {:on-click re-fetch-columns!}
+                             "select-modal"
+                             "Add")
+         :body-after [:div.list-group.list-group-flush
+                      (map query-tree-select-list-element (:select @query))]}))
 
 (defn query-tree-from-list-element [i x]
   ^{:key i}
   [:div.list-group-item
    [:span x]
-   [:span.float-end (delete-button #(remove-from-from-query x))]])
+   [:span.float-end (delete-button #(remove-from-from-query! x))]])
 
 (defn query-tree-select-modal-element [i column]
   ^{:key i}
   [:button {:class [:list-group-item :list-group-item-action]
-            :on-click #(add-select-to-query column)} column])
+            :on-click #(add-select-to-query! column)} column])
 
-(defn query-tree-select-modal []
+(defn query-select-modal []
   (modal {:id "select-modal"
           :title "Select columns"
           :body-after [:div.list-group
                        (map-indexed query-tree-select-modal-element @columns)]}))
 
-(defn query-tree-from-list []
-  (card "Some tables"
-        (modal-button {:class ["btn btn-light btn-outline-dark"]
-                       :on-click re-fetch-tables}
-                      "from-modal"
-                      "Add")
-        [:div.list-group.list-group-flush
-         (map-indexed query-tree-from-list-element (:from @query))]))
+(defn query-from-list []
+  (card {:title "Some tables"
+         :body (modal-button {:on-click re-fetch-tables!} "from-modal" "Add")
+         :body-after [:div.list-group.list-group-flush
+                      (map-indexed query-tree-from-list-element (:from @query))]}))
 
-(defn query-tree-from-modal []
+(defn query-from-modal []
   (modal {:id "from-modal"
           :title "Add from"
           :body-after (from-list)}))
 
-(defn query-tree []
+(defn query-ui []
   [:div
-   (query-tree-select-modal)
-   (query-tree-select-list)
-   (query-tree-from-modal)
-   (query-tree-from-list)])
-
-(defn data-table [rows]
-  [:table.table
-   [:tbody
-    (for [[i row] (map-indexed vector rows)]
-      ^{:key i}
-      [:tr
-       (for [[j col] (seq row)]
-         ^{:key j}
-         [:td col])])]])
+   (query-select-modal)
+   (query-select-list)
+   (query-from-modal)
+   (query-from-list)])
 
 (defn data-ui []
   [:div
-   [:button.btn.btn-default.btn-outline-dark {:on-click fetch-data} "Fetch data"]
-   (data-table @data)])
+   (button {:on-click fetch-data!} "Fetch data")
+   (table @data)])
 
 (defn layout [main right]
   [:div.container
@@ -163,7 +126,7 @@
 (defn app []
   (layout
    (data-ui)
-   (query-tree)))
+   (query-ui)))
 
 (defn mount []
   (rdom/render [app] (js/document.getElementById "app")))
