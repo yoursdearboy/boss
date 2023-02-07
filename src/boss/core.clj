@@ -3,6 +3,7 @@
             [ring.util.response :as response]
             [compojure.route :as route]
             [environ.core :refer [env]]
+            [ring.middleware.webjars :refer [wrap-webjars]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.adapter.jetty :refer [run-jetty]]
             [boss.db :refer [ds]]
@@ -29,6 +30,7 @@
 
 (def app
   (-> routes
+      (wrap-webjars)
       (wrap-reload)))
 
 (defn -main

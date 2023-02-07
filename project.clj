@@ -6,6 +6,8 @@
                  [org.xerial/sqlite-jdbc "3.36.0.3"]
                  [com.github.seancorfield/honeysql "2.4.972"]
                  [ring "1.9.6"]
+                 [ring-webjars "0.2.0"]
+                 [org.webjars/bootstrap "5.2.3"]
                  [compojure "1.7.0"]
                  [reagent "0.10.0"]
                  [cljs-ajax "0.8.4"]]
