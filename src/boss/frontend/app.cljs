@@ -32,6 +32,10 @@
   (GET "/tables"
     {:handler (comp #(reset! tables %) edn/read-string)}))
 
+(defn re-fetch-tables []
+  (reset! tables [])
+  (fetch-tables))
+
 (defn fetch-columns []
   (POST "/query/columns"
     {:body (pr-str (assoc @query :select [:*]))
@@ -79,9 +83,8 @@
             :on-click #(add-from-to-query x)} x])
 
 (defn from-list []
-  (card "Add some data" nil
-        [:div.list-group.list-group-flush
-         (map from-list-element @tables)]))
+  [:div.list-group
+   (map from-list-element @tables)])
 
 (defn query-tree-select-list-element [column]
   ^{:key column}
@@ -116,14 +119,24 @@
                        (map-indexed query-tree-select-modal-element @columns)]}))
 
 (defn query-tree-from-list []
-  (card "Some tables" nil
+  (card "Some tables"
+        (modal-button {:class ["btn btn-light btn-outline-dark"]
+                       :on-click re-fetch-tables}
+                      "from-modal"
+                      "Add")
         [:div.list-group.list-group-flush
          (map-indexed query-tree-from-list-element (:from @query))]))
+
+(defn query-tree-from-modal []
+  (modal {:id "from-modal"
+          :title "Add from"
+          :body-after (from-list)}))
 
 (defn query-tree []
   [:div
    (query-tree-select-modal)
    (query-tree-select-list)
+   (query-tree-from-modal)
    (query-tree-from-list)])
 
 (defn data-table [rows]
@@ -148,14 +161,11 @@
     [:div.col-sm-3 right]]])
 
 (defn app []
-  (layout [:div
-           (data-ui)]
-          [:div
-           (query-tree)
-           (from-list)]))
+  (layout
+   (data-ui)
+   (query-tree)))
 
 (defn mount []
-  (fetch-tables)
   (rdom/render [app] (js/document.getElementById "app")))
 
 (mount)
