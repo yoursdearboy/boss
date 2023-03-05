@@ -8,7 +8,8 @@
 
 ;; Query atom and machinery
 (defonce query (r/atom {:select []
-                        :from []}))
+                        :from []
+                        :left-join []}))
 
 (defn update-query! [in f]
   (swap! query #(update % in f)))
@@ -18,6 +19,12 @@
 
 (defn remove-from-from-query! [table]
   (update-query! :from #(into [] (remove #{table} %))))
+
+(defn add-left-join-to-query! [table]
+  (update-query! :left-join #(conj % [(keyword table) [:= nil nil]])))
+
+(defn remove-left-join-from-query! [table]
+  (update-query! :left-join #(into [] (remove #{table} %))))
 
 (defn add-select-to-query! [column]
   (update-query! :select #(conj % (keyword column))))
@@ -63,7 +70,16 @@
   [:div.list-group
    (map from-list-element @tables)])
 
-(defn query-tree-select-list-element [column]
+(defn left-join-list-element [x]
+  ^{:key x}
+  [:button {:class [:list-group-item :list-group-item-action]
+            :on-click #(add-left-join-to-query! x)} x])
+
+(defn left-join-list []
+  [:div.list-group
+   (map left-join-list-element @tables)])
+
+(defn query-select-list-element [column]
   ^{:key column}
   [:div.list-group-item
    [:span column]
@@ -75,15 +91,15 @@
                              "select-modal"
                              "Add")
          :body-after [:div.list-group.list-group-flush
-                      (map query-tree-select-list-element (:select @query))]}))
+                      (map query-select-list-element (:select @query))]}))
 
-(defn query-tree-from-list-element [i x]
+(defn query-from-list-element [i x]
   ^{:key i}
   [:div.list-group-item
    [:span x]
    [:span.float-end (delete-button #(remove-from-from-query! x))]])
 
-(defn query-tree-select-modal-element [i column]
+(defn query-select-modal-element [i column]
   ^{:key i}
   [:button {:class [:list-group-item :list-group-item-action]
             :on-click #(add-select-to-query! column)} column])
@@ -92,25 +108,47 @@
   (modal {:id "select-modal"
           :title "Select columns"
           :body-after [:div.list-group
-                       (map-indexed query-tree-select-modal-element @columns)]}))
+                       (map-indexed query-select-modal-element @columns)]}))
 
 (defn query-from-list []
   (card {:title "Some tables"
          :body (modal-button {:on-click re-fetch-tables!} "from-modal" "Add")
          :body-after [:div.list-group.list-group-flush
-                      (map-indexed query-tree-from-list-element (:from @query))]}))
+                      (map-indexed query-from-list-element (:from @query))]}))
 
 (defn query-from-modal []
   (modal {:id "from-modal"
           :title "Add from"
           :body-after (from-list)}))
 
+(defn query-left-join-list-element [i [table [op left right]]]
+  ^{:key i}
+  [:div.list-group-item
+   [:span table]
+   [:input {:type "text" :value op}]
+   [:input {:type "text" :value left}]
+   [:input {:type "text" :value right}]
+   [:span.float-end (delete-button #(js/alert "oh"))]])
+
+(defn query-left-join-list []
+  (card {:title "Left join"
+         :body (modal-button {:on-click re-fetch-tables!} "left-join-modal" "Add")
+         :body-after [:div.list-group.list-group-flush
+                      (map-indexed query-left-join-list-element (:left-join @query))]}))
+
+(defn query-left-join-modal []
+  (modal {:id "left-join-modal"
+          :title "Add left join"
+          :body-after (left-join-list)}))
+
 (defn query-ui []
   [:div
    (query-select-modal)
    (query-select-list)
    (query-from-modal)
-   (query-from-list)])
+   (query-from-list)
+   (query-left-join-modal)
+   (query-left-join-list)])
 
 (defn data-ui []
   [:div
